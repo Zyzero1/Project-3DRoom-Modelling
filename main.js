@@ -139,16 +139,18 @@ sideCabinet2.position.x = cabinetLength / 1.98 + -1.33 + 0.12;
 sideCabinet3.position.x = cabinetLength / 1.962 + 4.96 * (0.12 + 0.11); 
 
 // Definisi pintu
-const doorWidth = 0.1;
-const doorHeight = 3.8;
-const doorDepth = 1.2;
-const geometryDoor = new THREE.BoxGeometry(doorWidth, doorHeight, doorDepth);
+const doorWidth = 0.06;
+const doorHeight = 4.27;
+const doorDepth = 1.35;
+const geometryDoor = new THREE.BoxGeometry(doorDepth, doorHeight, doorWidth);
 const materialDoor = new THREE.MeshStandardMaterial({ map: textureCabinet });
 
 // Group untuk pintu dengan pivot yang tepat
 const doorGroup = new THREE.Group();
 const door = new THREE.Mesh(geometryDoor, materialDoor);
-door.position.set(-doorWidth / 2, 0, 0 / 2);
+door.position.set(doorDepth / 2, 0.214, 0);
+door.castShadow = true;
+door.receiveShadow = true;
 doorGroup.add(door);
 doorGroup.position.set(-2.50 + doorWidth / 2, 2, -1.17);
 scene.add(doorGroup);
@@ -182,29 +184,122 @@ document.addEventListener('keypress', onKeyPress);
 
 // Membuat bean bag dengan cekungan di dalamnya
 const beanBagSize = 1;
-const beanBagSegments = 32;
+const beanBagSegments = 64;
+
+// Geometri untuk bean bag
 const beanBagGeometry = new THREE.SphereGeometry(beanBagSize, beanBagSegments, beanBagSegments);
-const beanBagMaterial = new THREE.MeshStandardMaterial({ color: 0x008080 }); // Warna hijau tosca untuk bean bag
+
+// Fungsi untuk membuat kerutan halus pada bean bag
+function createBeanBagKerutan(geometry) {
+    const position = geometry.attributes.position;
+    const vector = new THREE.Vector3();
+    const center = new THREE.Vector3(0, 0, 0);
+
+    for (let i = 0; i < position.count; i++) {
+        vector.fromBufferAttribute(position, i);
+        
+        // Menambahkan kerutan yang halus pada setiap titik
+        const noiseX = 0.05 * (Math.random() - 0.6);
+        const noiseY = 0.03 * (Math.random() - 0.5);
+        const noiseZ = 0 * (Math.random() - 0.5);
+        vector.x += noiseX;
+        vector.y += noiseY;
+        vector.z += noiseZ;
+
+        // Memastikan posisi titik tetap berada di dalam batas bean bag
+        const distanceFromCenter = vector.distanceTo(center);
+        if (distanceFromCenter > beanBagSize) {
+            // Geser titik kembali ke permukaan bean bag
+            vector.sub(center).normalize().multiplyScalar(beanBagSize).add(center);
+        }
+        
+        position.setXYZ(i, vector.x, vector.y, vector.z);
+    }
+    
+    position.needsUpdate = true;
+    geometry.computeVertexNormals();
+}
+createBeanBagKerutan(beanBagGeometry);
+
+// Fungsi untuk membuat cekungan di bagian atas bean bag
+function createBeanBagCekungan(geometry) {
+    const position = geometry.attributes.position;
+    const vector = new THREE.Vector3();
+
+    for (let i = 0; i < position.count; i++) {
+        vector.fromBufferAttribute(position, i);
+        
+        // Menerapkan cekungan hanya pada bagian atas bean bag
+        const dipCenter = new THREE.Vector3(0.58, 0.6 * beanBagSize, 0); 
+        const distance = vector.distanceTo(dipCenter);
+        
+        // Radius cekungan lebih besar untuk membuat cekungan lebih lebar
+        if (distance < 0.63 * beanBagSize) {
+            // Menggunakan interpolasi linear untuk membuat tepi yang tumpul
+            let cekunganFactor = 0.67 - Math.pow(distance / (0.8 * beanBagSize), 1.7);
+            if (distance > 0.5 * beanBagSize) {
+                const t = (distance - 0.5 * beanBagSize) / (0.6 * beanBagSize - 0.5 * beanBagSize);
+                cekunganFactor = THREE.MathUtils.lerp(cekunganFactor, 0, t);
+            }
+            vector.y -= cekunganFactor * 1.5 * beanBagSize; // Sesuaikan kedalaman cekungan
+
+            // Menambahkan kerutan di sekitar cekungan
+            const noise = 0.03 * (Math.random() - 2);
+            vector.x += noise;
+            vector.z += noise;
+        }
+
+        // Mengubah posisi titik pada bagian atas agar lebih kurus
+        if (vector.y < 1 * beanBagSize) {
+            const t = (vector.y - 0.2 * beanBagSize) / (2 * beanBagSize - 0 * beanBagSize);
+            vector.x *= 1 - 0.5 * t; 
+            vector.z *= 1 - 0.3 * t; 
+        }
+        
+        position.setXYZ(i, vector.x, vector.y, vector.z);
+    }
+    position.needsUpdate = true;
+    geometry.computeVertexNormals();
+}
+
+createBeanBagCekungan(beanBagGeometry);
+
+// Material bean bag
+const beanBagMaterial = new THREE.MeshStandardMaterial({ 
+    map: textureBeanBag, 
+});
 const beanBag = new THREE.Mesh(beanBagGeometry, beanBagMaterial);
-beanBag.position.set(-1.3, beanBagSize / 2, 1.55); // Posisi bean bag
+beanBag.position.set(-1.3, 0.85 / 1.5, 1.55); // Posisi bean bag
+beanBag.scale.set(0.9, 0.85, 0.97); // Skala untuk memperlebar bean bag di sumbu x dan z
+beanBag.castShadow = true;
+beanBag.receiveShadow = true;
 scene.add(beanBag);
 
-// Membuat lampu tidur
-const lampBaseGeometry = new THREE.SphereGeometry(0.23, 8, 32, 32);
-const lampBaseMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-const lampBase = new THREE.Mesh(lampBaseGeometry, lampBaseMaterial);
+// Material putih mengkilat untuk alas dan batang lampu
+const ceramicMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    metalness: 0.1,
+    roughness: 0.2
+});
+
+// Membuat alas lampu tidur
+const lampBaseGeometry = new THREE.SphereGeometry(0.23, 5, 32, 32);
+const lampBase = new THREE.Mesh(lampBaseGeometry, ceramicMaterial);
 lampBase.position.set(1.5, 1.4, -1.85);
+lampBase.castShadow = true;
+lampBase.receiveShadow = true;
 scene.add(lampBase);
 
 // Batang lampu tidur
-const lampStemGeometry = new THREE.CylinderGeometry(0.04, 0.07, 0.33, 32);
-const lampStemMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-const lampStem = new THREE.Mesh(lampStemGeometry, lampStemMaterial);
+const lampStemGeometry = new THREE.CylinderGeometry(0.04, 0.07, 0.33, 64);
+const lampStem = new THREE.Mesh(lampStemGeometry, ceramicMaterial);
 lampStem.position.set(1.5, 1.77, -1.85);
+lampStem.castShadow = true;
+lampStem.receiveShadow = true;
 scene.add(lampStem);
 
 // Kap lampu tidur
-const lampShadeGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.7, 32);
+const lampShadeGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.7, 64);
 const lampShadeMaterial = new THREE.MeshPhongMaterial({ 
     map: textureLamp,
     side: THREE.DoubleSide,
@@ -215,40 +310,70 @@ const lampShadeMaterial = new THREE.MeshPhongMaterial({
 });
 const lampShade = new THREE.Mesh(lampShadeGeometry, lampShadeMaterial);
 lampShade.position.set(1.5, 2.29, -1.85); // Menetapkan posisi kap lampu tidur
+lampShade.castShadow = false;
+lampShade.receiveShadow = true;
 scene.add(lampShade);
 
 // Cahaya lampu tidur
-const lampLight = new THREE.PointLight(0xffff00, 9, 9);
+const lampLight = new THREE.PointLight(0xffff00, 10, 7);
 lampLight.position.set(1.5, 3.5, -1.85);
+lampLight.castShadow = true;
 scene.add(lampLight);
 
-// Fungsi untuk mengatur pergerakan kamera berdasarkan input keyboard
-function handleKeyboardInput(event) {
-    const moveSpeed = 0.1; // Kecepatan pergerakan kamera
+// Variabel untuk menyimpan posisi awal mouse saat menggerakkan objek
+let isDragging = false;
+let previousMousePosition = {
+    x: 0,
+    y: 0
+};
 
-    switch (event.key) {
-        case 'w':
-            camera.position.z -= moveSpeed; // Maju
-            break;
-        case 's':
-            camera.position.z += moveSpeed; // Mundur
-            break;
-        case 'a':
-            camera.position.x -= moveSpeed; // Kiri
-            break;
-        case 'd':
-            camera.position.x += moveSpeed; // Kanan
-            break;
+// Fungsi untuk menangani pergerakan mouse
+function onMouseMove(event) {
+    if (isDragging) {
+        const deltaMove = {
+            x: event.clientX - previousMousePosition.x,
+            y: event.clientY - previousMousePosition.y
+        };
+
+        const rotationSpeed = 0.01;
+
+        // Menggunakan quaternions untuk rotasi yang lebih stabil
+        const quaternionX = new THREE.Quaternion();
+        const quaternionY = new THREE.Quaternion();
+
+        quaternionX.setFromAxisAngle(new THREE.Vector3(1, 0, 0), deltaMove.y * rotationSpeed);
+        quaternionY.setFromAxisAngle(new THREE.Vector3(0, 1, 0), deltaMove.x * rotationSpeed);
+
+        scene.quaternion.multiplyQuaternions(quaternionY, scene.quaternion);
+        scene.quaternion.multiplyQuaternions(quaternionX, scene.quaternion);
+
+        previousMousePosition = {
+            x: event.clientX,
+            y: event.clientY
+        };
     }
 }
 
-// Panggil fungsi handleKeyboardInput saat tombol ditekan
-document.addEventListener('keydown', handleKeyboardInput);
+// Fungsi untuk menangani saat mouse ditekan
+function onMouseDown(event) {
+    isDragging = true;
+    previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY
+    };
+}
 
-// Mengatur posisi kamera
-camera.position.set(5, 0.6 * 5, 5);
-camera.lookAt(size / 3, 2, size / 3);
+// Fungsi untuk menangani saat mouse dilepas
+function onMouseUp() {
+    isDragging = false;
+}
 
+// Menambahkan event listener untuk mouse
+document.addEventListener('mousemove', onMouseMove, false);
+document.addEventListener('mousedown', onMouseDown, false);
+document.addEventListener('mouseup', onMouseUp, false);
+
+// Fungsi untuk melakukan animasi
 function animate() {
     const delta = clock.getDelta(); // Mendapatkan waktu yang berlalu
     if (Math.abs(doorGroup.rotation.y - doorRotationTarget) > 0.01) { // Tambahkan toleransi untuk perbandingan floating-point
@@ -265,5 +390,4 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Mulai animasi
 animate();
