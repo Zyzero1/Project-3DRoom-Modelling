@@ -291,7 +291,7 @@ lampBase.receiveShadow = true;
 scene.add(lampBase);
 
 // Batang lampu tidur
-const lampStemGeometry = new THREE.CylinderGeometry(0.04, 0.07, 0.33, 64);
+const lampStemGeometry = new THREE.CylinderGeometry(0.04, 0.07, 0.48, 64);
 const lampStem = new THREE.Mesh(lampStemGeometry, ceramicMaterial);
 lampStem.position.set(1.5, 1.77, -1.85);
 lampStem.castShadow = true;
@@ -304,9 +304,9 @@ const lampShadeMaterial = new THREE.MeshPhongMaterial({
     map: textureLamp,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.8, 
-    emissive: 0x444444, // Memberikan efek cahaya dari dalam
-    emissiveIntensity: 0.8 // Intensitas cahaya yang dipancarkan dari dalam kap lampu
+    opacity: 0.95, 
+    emissive: 0x222200, // Memberikan efek cahaya dari dalam
+    emissiveIntensity: 0.7 // Intensitas cahaya yang dipancarkan dari dalam kap lampu
 });
 const lampShade = new THREE.Mesh(lampShadeGeometry, lampShadeMaterial);
 lampShade.position.set(1.5, 2.29, -1.85); // Menetapkan posisi kap lampu tidur
@@ -314,9 +314,22 @@ lampShade.castShadow = false;
 lampShade.receiveShadow = true;
 scene.add(lampShade);
 
+// Lampu bohlam
+const bulbGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+const bulbMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffff00,
+    transparent: true,
+    opacity: 0.9,
+    emissive: 0xffffff,
+    emissiveIntensity: 0.5
+});
+const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+bulb.position.set(1.5, 2.1, -1.85);
+scene.add(bulb);
+
 // Cahaya lampu tidur
 const lampLight = new THREE.PointLight(0xffff00, 10, 7);
-lampLight.position.set(1.5, 3.5, -1.85);
+lampLight.position.set(1.5, 3.1, -1.85);
 lampLight.castShadow = true;
 scene.add(lampLight);
 
