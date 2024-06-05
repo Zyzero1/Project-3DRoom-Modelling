@@ -7,7 +7,7 @@ camera.lookAt(0, 2, 0);
 
 // Fungsi untuk mengatur pergerakan kamera berdasarkan input keyboard
 function handleKeyboardInput(event) {
-    const moveSpeed = 0.1; // Kecepatan pergerakan kamera
+    const moveSpeed = 0.4; // Kecepatan pergerakan kamera
     
     switch (event.key) {
         case 'w':
