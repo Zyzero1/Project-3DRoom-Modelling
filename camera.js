@@ -5,6 +5,12 @@ export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window
 camera.position.set(5, 3, 5);
 camera.lookAt(0, 2, 0);
 
+// Variabel untuk menyimpan posisi mouse sebelumnya
+let previousMousePosition = {
+    x: 0,
+    y: 0
+};
+
 // Fungsi untuk mengatur pergerakan kamera berdasarkan input keyboard
 function handleKeyboardInput(event) {
     const moveSpeed = 0.4; // Kecepatan pergerakan kamera
@@ -30,6 +36,39 @@ function handleKeyboardInput(event) {
             break;
     }
 }
-                
+
+// Fungsi untuk mengatur pergerakan kamera berdasarkan input mouse
+function handleMouseMove(event) {
+    const deltaMove = {
+        x: event.clientX - previousMousePosition.x,
+        y: event.clientY - previousMousePosition.y
+    };
+
+    const rotateSpeed = 0.003; // Kecepatan rotasi kamera
+
+    // Update sudut rotasi berdasarkan pergerakan mouse
+    camera.rotation.y -= deltaMove.x * rotateSpeed;
+    camera.rotation.x -= deltaMove.y * rotateSpeed;
+    
+    // Batasi sudut rotasi vertikal agar tidak terbalik
+    camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+
+    previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY
+    };
+}
+
 // Panggil fungsi handleKeyboardInput saat tombol ditekan
 document.addEventListener('keydown', handleKeyboardInput);
+
+// Panggil fungsi handleMouseMove saat mouse atau touchpad digerakkan
+document.addEventListener('pointermove', handleMouseMove);
+
+// Update posisi mouse sebelumnya saat pointer bergerak
+document.addEventListener('pointermove', (event) => {
+    previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY
+    };
+});
