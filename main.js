@@ -9,7 +9,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-// Pencahayaan
+// Kode Pencahayaan
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
 scene.add(ambientLight);
 
@@ -209,7 +209,6 @@ function createBeanBagKerutan(geometry) {
         // Memastikan posisi titik tetap berada di dalam batas bean bag
         const distanceFromCenter = vector.distanceTo(center);
         if (distanceFromCenter > beanBagSize) {
-            // Geser titik kembali ke permukaan bean bag
             vector.sub(center).normalize().multiplyScalar(beanBagSize).add(center);
         }
         
@@ -249,7 +248,7 @@ function createBeanBagCekungan(geometry) {
             vector.z += noise;
         }
 
-        // Mengubah posisi titik pada bagian atas agar lebih kurus
+        // Mengubah posisi titik pada bagian atas agar lebih lonjong
         if (vector.y < 1 * beanBagSize) {
             const t = (vector.y - 0.2 * beanBagSize) / (2 * beanBagSize - 0 * beanBagSize);
             vector.x *= 1 - 0.5 * t; 
@@ -275,7 +274,7 @@ beanBag.castShadow = true;
 beanBag.receiveShadow = true;
 scene.add(beanBag);
 
-// Material putih mengkilat untuk alas dan batang lampu
+// Material putih mengkilat untuk alas lampu
 const ceramicMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     metalness: 0.1,
@@ -298,7 +297,7 @@ lampStem.castShadow = true;
 lampStem.receiveShadow = true;
 scene.add(lampStem);
 
-// Kap lampu tidur
+// Penutup lampu tidur
 const lampShadeGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.7, 64);
 const lampShadeMaterial = new THREE.MeshPhongMaterial({ 
     map: textureLamp,
@@ -309,7 +308,7 @@ const lampShadeMaterial = new THREE.MeshPhongMaterial({
     emissiveIntensity: 0.7 // Intensitas cahaya yang dipancarkan dari dalam kap lampu
 });
 const lampShade = new THREE.Mesh(lampShadeGeometry, lampShadeMaterial);
-lampShade.position.set(1.5, 2.29, -1.85); // Menetapkan posisi kap lampu tidur
+lampShade.position.set(1.5, 2.29, -1.85); // Menetapkan posisi penutup lampu tidur
 lampShade.castShadow = false;
 lampShade.receiveShadow = true;
 scene.add(lampShade);
