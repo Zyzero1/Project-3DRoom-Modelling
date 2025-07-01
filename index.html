@@ -1,13 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>3D Room Modelling</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-		<script type="module" src="/main.js"></script>
-	</body>
+    <head>
+        <meta charset="utf-8">
+        <title>3D Room Modelling</title>
+        <style>
+            body { margin: 0; }
+            #info {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100vw;
+                background: rgba(255,255,255,0.95);
+                color: #222;
+                font-family: Arial, sans-serif;
+                font-size: 1rem;
+                padding: 12px 20px;
+                box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+                z-index: 10;
+            }
+        </style>
+    </head>
+    <body>
+        <script type="module" src="main.js"></script>
+        <div id="info">
+            <b>Petunjuk:</b>  
+            - <b>Klik dua kali</b> pada objek untuk memutar objek.<br>
+            - Gerakkan kamera dengan tombol <b>W</b>, <b>A</b>, <b>S</b>, <b>D</b>.<br>
+            - Buka pintu lemari <b>o</b>, dan tutup pintu <b>c</b>.<br>
+        </div>
+    </body>
 </html>

@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'https://unpkg.com/three@0.155.0/build/three.module.js';
 
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 // Mengatur posisi dan arah pandang kamera
@@ -6,10 +6,10 @@ camera.position.set(5, 3, 5);
 camera.lookAt(0, 2, 0);
 
 // Variabel untuk menyimpan posisi mouse sebelumnya
-let previousMousePosition = {
-    x: 0,
-    y: 0
-};
+// let previousMousePosition = {
+//     x: 0,
+//     y: 0
+// };
 
 // Fungsi untuk mengatur pergerakan kamera berdasarkan input keyboard
 function handleKeyboardInput(event) {
@@ -46,11 +46,9 @@ function handleMouseMove(event) {
 
     const rotateSpeed = 0.003; // Kecepatan rotasi kamera
 
-    // Update sudut rotasi berdasarkan pergerakan mouse
     camera.rotation.y -= deltaMove.x * rotateSpeed;
     camera.rotation.x -= deltaMove.y * rotateSpeed;
     
-    // Batasi sudut rotasi vertikal agar tidak terbalik
     camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
 
     previousMousePosition = {
@@ -63,12 +61,12 @@ function handleMouseMove(event) {
 document.addEventListener('keydown', handleKeyboardInput);
 
 // Panggil fungsi handleMouseMove saat mouse atau touchpad digerakkan
-document.addEventListener('pointermove', handleMouseMove);
+// document.addEventListener('pointermove', handleMouseMove);
 
 // Update posisi mouse sebelumnya saat pointer bergerak
-document.addEventListener('pointermove', (event) => {
-    previousMousePosition = {
-        x: event.clientX,
-        y: event.clientY
-    };
-});
+// document.addEventListener('pointermove', (event) => {
+//     previousMousePosition = {
+//         x: event.clientX,
+//         y: event.clientY
+//     };
+// });
